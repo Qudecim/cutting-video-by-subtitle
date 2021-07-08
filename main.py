@@ -1,5 +1,7 @@
 import os
 from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
+from moviepy.video.io.VideoFileClip import VideoFileClip
+
 
 def get_phrase():
     return open('resource/phrases/1.txt')
@@ -57,9 +59,19 @@ def get_cut_data(phrase):
 
 
 def cut_video(data, phrase_index, index):
-    ffmpeg_extract_subclip("./resource/video/" + data['movie'] + "/" + data['part'] + ".mp4",
-                           data['time_start'], data['time_end'],
-                           targetname="./resource/out/" + str(phrase_index) + "/" + str(index) + ".mp4")
+    cut_video_2("./resource/video/" + data['movie'] + "/" + data['part'] + ".mp4",
+                "./resource/out/" + str(phrase_index) + "/" + str(index) + ".mp4",
+                data['time_start'], data['time_end'])
+    # ffmpeg_extract_subclip("./resource/video/" + data['movie'] + "/" + data['part'] + ".mp4",
+    #                        data['time_start'], data['time_end'],
+    #                        targetname="./resource/out/" + str(phrase_index) + "/" + str(index) + ".mp4")
+
+
+def cut_video_2(file_in, file_out, t1, t2):
+    with VideoFileClip(file_in) as video:
+        new = video.subclip(t1, t2)
+        new.write_videofile(file_out, audio_codec='aac')
+        #new.write_videofile(file_out, fps=30, threads=1, codec="libx264")
 
 
 class Phrase:
