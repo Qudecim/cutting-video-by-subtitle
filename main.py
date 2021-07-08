@@ -1,5 +1,5 @@
 import os
-from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
+#from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 from moviepy.video.io.VideoFileClip import VideoFileClip
 
 
@@ -58,20 +58,22 @@ def get_cut_data(phrase):
     return cut_data
 
 
-def cut_video(data, phrase_index, index):
-    cut_video_2("./resource/video/" + data['movie'] + "/" + data['part'] + ".mp4",
+def make_clip(data, phrase_index, index):
+    cut_video("./resource/video/" + data['movie'] + "/" + data['part'] + ".mp4",
                 "./resource/out/" + str(phrase_index) + "/" + str(index) + ".mp4",
                 data['time_start'], data['time_end'])
-    # ffmpeg_extract_subclip("./resource/video/" + data['movie'] + "/" + data['part'] + ".mp4",
-    #                        data['time_start'], data['time_end'],
-    #                        targetname="./resource/out/" + str(phrase_index) + "/" + str(index) + ".mp4")
 
 
-def cut_video_2(file_in, file_out, t1, t2):
+def cut_video(file_in, file_out, t1, t2):
     with VideoFileClip(file_in) as video:
         new = video.subclip(t1, t2)
         new.write_videofile(file_out, audio_codec='aac')
+        #
         #new.write_videofile(file_out, fps=30, threads=1, codec="libx264")
+        #
+        # ffmpeg_extract_subclip("./resource/video/" + data['movie'] + "/" + data['part'] + ".mp4",
+        #                        data['time_start'], data['time_end'],
+        #                        targetname="./resource/out/" + str(phrase_index) + "/" + str(index) + ".mp4")
 
 
 class Phrase:
@@ -81,12 +83,8 @@ class Phrase:
         for phrase_index, phrase in enumerate(phrases):
             cut_data = get_cut_data(phrase)
             for index, cut_data_item in enumerate(cut_data):
-                cut_video(cut_data_item, phrase_index, index)
+                make_clip(cut_data_item, phrase_index, index)
 
 
 
 x = Phrase()
-
-# from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
-# # ffmpeg_extract_subclip("full.mp4", start_seconds, end_seconds, targetname="cut.mp4")
-# ffmpeg_extract_subclip("1.mp4", 0, 20, targetname="cut.mp4")
