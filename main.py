@@ -1,7 +1,6 @@
 import os
-from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
+#from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 from moviepy.video.io.VideoFileClip import VideoFileClip
-import re
 
 
 def prepare_dir(directory):
@@ -21,7 +20,6 @@ def get_time(file, line):
     try:
         if line < 0:
             return get_pre_time(str(file[1], 'utf-8').rstrip())
-        print(file[line - 1])
         text = str(file[line - 1], 'utf-8').rstrip()
         if text == '':
             return get_pre_time(str(file[line + 1], 'utf-8').rstrip())
@@ -53,6 +51,8 @@ def get_cut_data(phrase):
     cut_data = []
     list_movies = os.listdir(path="./resource/subs/")
     for movie in list_movies:
+        if movie[0] == '_':
+            continue
         dir_movie = "./resource/subs/" + movie
         list_seasons = os.listdir(path=dir_movie)
         for season in list_seasons:
@@ -78,9 +78,10 @@ def get_cut_data(phrase):
 
 
 def make_clip(data, phrase_index, index):
-    # print(data)
-    # return
-    cut_video("./resource/video/" + data['movie'] + "/" + data['season'] + "/" + data['part'] + ".avi",
+    ext = get_extension_video(data['movie'], data['season'], data['part'])
+    if not ext:
+        return
+    cut_video("./resource/video/" + data['movie'] + "/" + data['season'] + "/" + data['part'] + "." + ext,
               "./resource/out/" + str(phrase_index) + "/" + str(index) + ".mp4",
               data['time_start'], data['time_end'])
 
@@ -95,6 +96,15 @@ def cut_video(file_in, file_out, t1, t2):
         # ffmpeg_extract_subclip(file_in,
         #                        t1, t2,
         #                        targetname=file_out)
+
+
+def get_extension_video(movie, season, part):
+    path = "./resource/video/" + movie + "/" + season + "/" + part
+    if os.path.exists(path + ".mp4"):
+        return 'mp4'
+    if os.path.exists(path + ".avi"):
+        return 'avi'
+    return False
 
 
 class Phrase:

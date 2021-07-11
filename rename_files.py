@@ -1,9 +1,11 @@
 import os
 
-r_dir = 'video'
+r_dir = 'subs'
 
 list_movies = os.listdir(path="./resource/" + r_dir + "/")
 for movie in list_movies:
+    if movie[0] == '_':
+        continue
     dir_movie = "./resource/" + r_dir + "/" + movie
     list_seasons = os.listdir(path=dir_movie)
     for season in list_seasons:
@@ -16,5 +18,5 @@ for movie in list_movies:
             file_name = str(file)
             if file < 10:
                 file_name = "0" + str(file)
-            extension = part.split('.')[1]
+            extension = part.split('.')[-1]
             os.rename(dir_part + part, dir_part + file_name + "." + extension)
