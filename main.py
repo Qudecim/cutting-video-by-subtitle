@@ -1,6 +1,9 @@
 import os
 #from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 from moviepy.video.io.VideoFileClip import VideoFileClip
+import hashlib
+
+resource_path = '/media/hackpsy/005EADA65EAD94C6/clips/'
 
 
 def prepare_dir(directory):
@@ -9,11 +12,11 @@ def prepare_dir(directory):
 
 
 def get_phrase():
-    return open('resource/phrases/1.txt', 'r')
+    return open(resource_path + 'phrases/1.txt', 'r')
 
 
 def get_sub(movie, season, part):
-    return open('resource/subs/' + movie + '/' + season + '/' + part + '.srt', 'rb').readlines()
+    return open(resource_path + 'subs/' + movie + '/' + season + '/' + part + '.srt', 'rb').readlines()
 
 
 def get_time(file, line):
@@ -49,14 +52,14 @@ def str_to_time(time):
 
 def get_cut_data(phrase):
     cut_data = []
-    list_movies = os.listdir(path="./resource/subs/")
+    list_movies = os.listdir(path=resource_path + "subs/")
     for movie in list_movies:
         if movie[0] == '_':
             continue
-        dir_movie = "./resource/subs/" + movie
+        dir_movie = resource_path + "subs/" + movie
         list_seasons = os.listdir(path=dir_movie)
         for season in list_seasons:
-            dir_season = "./resource/subs/" + movie + "/" + season
+            dir_season = resource_path + "subs/" + movie + "/" + season
             list_parts = os.listdir(path=dir_season)
             for part in list_parts:
                 part_id = part.split('.')[0]
@@ -77,19 +80,26 @@ def get_cut_data(phrase):
     return cut_data
 
 
-def make_clip(data, phrase_index, index):
+def make_clip(data, phrase):
     ext = get_extension_video(data['movie'], data['season'], data['part'])
     if not ext:
         return
-    cut_video("./resource/video/" + data['movie'] + "/" + data['season'] + "/" + data['part'] + "." + ext,
-              "./resource/out/" + str(phrase_index) + "/" + str(index) + ".mp4",
+    o_phrase_hash = hashlib.md5(str(phrase).encode())
+    phrase_hash = o_phrase_hash.hexdigest()
+    prepare_dir(resource_path + 'out/' + phrase_hash)
+    file_name = data['movie'] + '__' + data['season'] + '__' + data['part'] + '__' + str(data['time_start'])
+    cut_video(resource_path + "video/" + data['movie'] + "/" + data['season'] + "/" + data['part'] + "." + ext,
+              resource_path + "out/" + phrase_hash + "/" + file_name + ".mp4",
               data['time_start'], data['time_end'])
 
 
 def cut_video(file_in, file_out, t1, t2):
-    with VideoFileClip(file_in) as video:
-        new = video.subclip(t1 - 1, t2 + 1)
-        new.write_videofile(file_out, audio_codec='aac')
+    try:
+        with VideoFileClip(file_in) as video:
+            new = video.subclip(t1 - 1, t2 + 1)
+            new.write_videofile(file_out, audio_codec='aac')
+    except:
+        return False
         #
         # new.write_videofile(file_out, fps=30, threads=1, codec="libx264")
         #
@@ -99,32 +109,35 @@ def cut_video(file_in, file_out, t1, t2):
 
 
 def get_extension_video(movie, season, part):
-    path = "./resource/video/" + movie + "/" + season + "/" + part
+    path = resource_path + "video/" + movie + "/" + season + "/" + part
     if os.path.exists(path + ".mp4"):
         return 'mp4'
     if os.path.exists(path + ".avi"):
         return 'avi'
+    if os.path.exists(path + ".mkv"):
+        return 'mkv'
     return False
 
 
 class Phrase:
 
     def __init__(self):
-        phrases = get_phrase()
-        for phrase_index, phrase in enumerate(phrases):
-            cut_data = get_cut_data(phrase)
-            for index, cut_data_item in enumerate(cut_data):
-                make_clip(cut_data_item, phrase_index, index)
+        with open('log.txt', 'a') as file:
+            phrases = get_phrase()
+            for phrase_line in phrases:
+                a_phrases = phrase_line.split('|')
+                phrase = a_phrases[0]
+                cut_data = get_cut_data(phrase)
+                o_phrase_hash = hashlib.md5(str(phrase).encode())
+                phrase_hash = o_phrase_hash.hexdigest()
+                file.write(phrase + ' ' + phrase_hash + '\n')
+                for cut_data_item in cut_data:
+                    make_clip(cut_data_item, phrase)
+                    file.write('-- movie:' + cut_data_item['movie'] +
+                               ' season:' + cut_data_item['movie'] +
+                               ' part:' + cut_data_item['part'] + '\n'
+                               )
+                file.write('\n')
 
 
 x = Phrase()
-
-# d = b"<i>It's my first day.</i>\r\n"
-# f = "It's my first day."
-# phrases = get_phrase()
-# for phrase_index, phrase in enumerate(phrases):
-#     dd = str(phrase).rstrip()
-#     #dd = dd.replace("\n", "")
-#     print(dd)
-#     print(d)
-#     print(str(dd) in str(d))

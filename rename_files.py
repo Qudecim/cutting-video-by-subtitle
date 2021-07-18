@@ -1,19 +1,20 @@
 import os
 
+resource_path = '/media/hackpsy/005EADA65EAD94C6/clips/'
 r_dir = 'subs'
 
-list_movies = os.listdir(path="./resource/" + r_dir + "/")
+list_movies = os.listdir(path=resource_path + r_dir + "/")
 for movie in list_movies:
     if movie[0] == '_':
         continue
-    dir_movie = "./resource/" + r_dir + "/" + movie
+    dir_movie = resource_path + r_dir + "/" + movie
     list_seasons = os.listdir(path=dir_movie)
     for season in list_seasons:
-        dir_season = "./resource/" + r_dir + "/" + movie + "/" + season
+        dir_season = resource_path + r_dir + "/" + movie + "/" + season
         list_parts = os.listdir(path=dir_season)
         list_parts.sort()
         for index, part in enumerate(list_parts):
-            dir_part = "./resource/" + r_dir + "/" + movie + "/" + season + "/"
+            dir_part = resource_path + r_dir + "/" + movie + "/" + season + "/"
             file = index + 1
             file_name = str(file)
             if file < 10:
