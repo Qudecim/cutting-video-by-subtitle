@@ -1,7 +1,7 @@
 import os
 
 resource_path = '/media/hackpsy/005EADA65EAD94C6/clips/'
-r_dir = 'subs'
+r_dir = 'video'
 
 list_movies = os.listdir(path=resource_path + r_dir + "/")
 for movie in list_movies:

@@ -2,6 +2,7 @@ import os
 #from moviepy.video.io.ffmpeg_tools import ffmpeg_extract_subclip
 from moviepy.video.io.VideoFileClip import VideoFileClip
 import hashlib
+import mysql.connector
 
 resource_path = '/media/hackpsy/005EADA65EAD94C6/clips/'
 
@@ -121,7 +122,24 @@ def get_extension_video(movie, season, part):
 
 class Phrase:
 
+    db = 0
+
     def __init__(self):
+        self.db = mysql.connector.connect(user='animania', password='123ZXCzxc', host='127.0.0.1', database='eng')
+        self.test()
+
+    def test(self):
+        cursor = self.cnx.cursor()
+        query = ("SELECT" + " * FROM `words` WHERE `type` = 2 LIMIT 10")
+        cursor.execute(query)
+        for (id, en, hash) in cursor:
+            print(en)
+
+        cursor.close()
+        cnx.close()
+
+    def index(self):
+        d = self.db
         with open('log.txt', 'a') as file:
             phrases = get_phrase()
             for phrase_line in phrases:
