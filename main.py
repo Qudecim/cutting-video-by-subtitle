@@ -130,7 +130,7 @@ class Phrase:
         self.index()
 
     def add(self, hash, movie, season, part, use, time_start, extension):
-        params = [hash, movie, season, part, use, time_start, extension,
+        params = [hash, movie, season, part, time_start, use, extension,
                   time.strftime('%Y-%m-%d %H:%M:%S'), time.strftime('%Y-%m-%d %H:%M:%S')]
         insert_movies_query = """
         INSERT INTO `clips_phrases`(`word_hash`, `movie`, `season`, `part`, `start_time`,
