@@ -3,6 +3,7 @@ import os
 from moviepy.video.io.VideoFileClip import VideoFileClip
 import hashlib
 import mysql.connector
+import time
 
 resource_path = '/media/hackpsy/005EADA65EAD94C6/clips/'
 
@@ -126,20 +127,22 @@ class Phrase:
 
     def __init__(self):
         self.db = mysql.connector.connect(user='animania', password='123ZXCzxc', host='127.0.0.1', database='eng')
-        self.test()
+        self.index()
 
-    def test(self):
-        cursor = self.cnx.cursor()
-        query = ("SELECT" + " * FROM `words` WHERE `type` = 2 LIMIT 10")
-        cursor.execute(query)
-        for (id, en, hash) in cursor:
-            print(en)
-
-        cursor.close()
-        cnx.close()
+    def add(self, hash, movie, season, part, use, time_start, extension):
+        params = [hash, movie, season, part, use, time_start, extension,
+                  time.strftime('%Y-%m-%d %H:%M:%S'), time.strftime('%Y-%m-%d %H:%M:%S')]
+        insert_movies_query = """
+        INSERT INTO `clips_phrases`(`word_hash`, `movie`, `season`, `part`, `start_time`,
+                                    `active`, `extension`, `created_at`, `updated_at`)
+        VALUES
+            (%s,%s,%s,%s,%s,%s,%s,%s,%s)
+        """
+        with self.db.cursor() as cursor:
+            cursor.execute(insert_movies_query, params)
+            self.db.commit()
 
     def index(self):
-        d = self.db
         with open('log.txt', 'a') as file:
             phrases = get_phrase()
             for phrase_line in phrases:
@@ -151,8 +154,10 @@ class Phrase:
                 file.write(phrase + ' ' + phrase_hash + '\n')
                 for cut_data_item in cut_data:
                     make_clip(cut_data_item, phrase)
+                    extension = get_extension_video(cut_data_item['movie'], cut_data_item['season'], cut_data_item['part'])
+                    self.add(phrase_hash, cut_data_item['movie'], cut_data_item['season'], cut_data_item['part'], 1, cut_data_item['time_start'], extension)
                     file.write('-- movie:' + cut_data_item['movie'] +
-                               ' season:' + cut_data_item['movie'] +
+                               ' season:' + cut_data_item['season'] +
                                ' part:' + cut_data_item['part'] + '\n'
                                )
                 file.write('\n')
