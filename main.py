@@ -21,14 +21,17 @@ def get_sub(movie, season, part):
     return open(resource_path + 'subs/' + movie + '/' + season + '/' + part + '.srt', 'rb').readlines()
 
 
-def get_time(file, line):
+def get_time(file, line, iter = 0):
+    n_iter = iter + 1
+    if n_iter > 20:
+        return False
     try:
         if line < 0:
             return get_pre_time(str(file[1], 'utf-8').rstrip())
         text = str(file[line - 1], 'utf-8').rstrip()
         if text == '':
             return get_pre_time(str(file[line + 1], 'utf-8').rstrip())
-        return get_time(file, line - 1)
+        return get_time(file, line - 1, n_iter)
     except UnicodeDecodeError:
         return False
 
